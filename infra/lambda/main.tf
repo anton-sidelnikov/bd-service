@@ -1,0 +1,20 @@
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = ">= 5.94.1"
+    }
+  }
+  backend "s3" {
+    bucket         = "bds-tf-state" // need to be created before (ex. state-bootstrap.tf)
+    key            = "prod/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-locks" // need to be created before (ex. state-bootstrap.tf)
+    encrypt        = true
+    lock_timeout   = "100s"
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}

@@ -1,0 +1,54 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    environment: deploy
+    name: Deploy Lambda & Infra (AWS)
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-oidc-terraform-deploy
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Check if remote state bucket exists
+        id: state-check
+        run: |
+          if aws s3api head-bucket --bucket my-birthday-tf-state 2>/dev/null; then
+            echo "state_bucket_exists=true" >> "$GITHUB_ENV"
+          else
+            echo "state_bucket_exists=false" >> "$GITHUB_ENV"
+          fi
+
+      - name: Bootstrap remote state (if needed)
+        if: env.state_bucket_exists == 'false'
+        run: |
+          cd state-bootstrap
+          terraform init
+          terraform apply -var aws_region=${{ secrets.AWS_REGION }} -auto-approve
+
+      - name: Package Lambda function
+        run: |
+          cd lambda
+          pip install -r ../requirements.txt -t .
+          zip -r ../lambda.zip .
+          cd ..
+
+      - name: Deploy Infrastructure
+        run: |
+          cd infra
+          terraform init -reconfigure
+          terraform apply -var aws_region=${{ secrets.AWS_REGION }} -auto-approve
