@@ -15,7 +15,7 @@ resource "aws_iam_role" "github_deploy" {
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {
         StringLike = {
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:ref:refs/heads/main"
+          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:*"
         }
       }
     }]
@@ -72,7 +72,9 @@ resource "aws_iam_policy" "deploy_policy" {
           "dynamodb:CreateTable",
           "dynamodb:DeleteTable",
           "dynamodb:DescribeTable",
-          "dynamodb:TagResource"
+          "dynamodb:TagResource",
+          "dynamodb:DescribeContinuousBackups",
+          "dynamodb:ListTagsOfResource"
         ],
         Resource = "*"
       },
@@ -113,10 +115,7 @@ resource "aws_iam_policy" "deploy_policy" {
       {
         Effect = "Allow",
         Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject",
-          "s3:ListBucket"
+          "s3:*",
         ],
         Resource = [
           "arn:aws:s3:::bds-tf-state",
@@ -131,7 +130,8 @@ resource "aws_iam_policy" "deploy_policy" {
           "dynamodb:GetItem",
           "dynamodb:PutItem",
           "dynamodb:DeleteItem",
-          "dynamodb:DescribeTable"
+          "dynamodb:DescribeTable",
+          "dynamodb:DescribeTimeToLive"
         ],
         Resource = "arn:aws:dynamodb:${var.aws_region}:${var.aws_account_id}:table/terraform-locks"
       }
