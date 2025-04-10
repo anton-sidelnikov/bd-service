@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime, timedelta
 
-from src.utils import days_until_next_birthday, is_valid_dob, is_valid_username
+from utils import days_until_next_birthday, is_valid_dob, is_valid_username
 
 
 class TestUtils(unittest.TestCase):

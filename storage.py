@@ -4,7 +4,7 @@ import os
 
 import boto3
 
-from src.model import DynamoResponse, User
+from model import DynamoResponse, User
 
 
 class DynamoDBStorage:

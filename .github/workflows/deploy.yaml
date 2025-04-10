@@ -49,9 +49,8 @@ jobs:
 
       - name: Package Lambda function
         run: |
-          cd src
           pip install -r requirements.txt -t .
-          zip -r ../lambda.zip .
+          zip -r lambda.zip .
           cd ..
 
       - name: Deploy Infrastructure

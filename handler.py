@@ -2,9 +2,9 @@ import json
 import os
 from datetime import datetime
 
-from src.model import User
-from src.storage import DynamoDBStorage
-from src.utils import days_until_next_birthday, is_valid_dob, is_valid_username
+from model import User
+from storage import DynamoDBStorage
+from utils import days_until_next_birthday, is_valid_dob, is_valid_username
 
 TABLE_NAME = os.environ.get("TABLE_NAME", "Users")
 storage = DynamoDBStorage(TABLE_NAME)
@@ -20,9 +20,8 @@ def respond(status_code: int, message):
 
 
 def lambda_handler(event, context):
-    http_method = event.get("httpMethod")
-    path_params = event.get("pathParameters") or {}
-    username = path_params.get("username", "").strip()
+    http_method = event.get("httpMethod") or event.get("requestContext", {}).get("http", {}).get("method")
+    username = (event.get("pathParameters", {}).get("username") or event.get("rawPath", "").rsplit("/", 1)[-1]).strip()
 
     if not is_valid_username(username):
         return respond(400, "Username must contain only letters.")

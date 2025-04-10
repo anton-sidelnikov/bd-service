@@ -34,15 +34,7 @@ resource "aws_iam_policy" "deploy_policy" {
       {
         Effect = "Allow",
         Action = [
-          "lambda:CreateFunction",
-          "lambda:UpdateFunctionCode",
-          "lambda:UpdateFunctionConfiguration",
-          "lambda:PublishVersion",
-          "lambda:CreateAlias",
-          "lambda:UpdateAlias",
-          "lambda:GetFunction",
-          "lambda:AddPermission",
-          "lambda:ListVersionsByFunction"
+          "lambda:*",
         ],
         Resource = "*"
       },
@@ -51,30 +43,26 @@ resource "aws_iam_policy" "deploy_policy" {
       {
         Effect = "Allow",
         Action = [
-          "apigatewayv2:CreateApi",
-          "apigatewayv2:CreateRoute",
-          "apigatewayv2:CreateIntegration",
-          "apigatewayv2:CreateStage",
-          "apigatewayv2:GetApi",
-          "apigatewayv2:UpdateApi",
-          "apigatewayv2:UpdateStage",
-          "apigatewayv2:GetIntegration",
-          "apigatewayv2:DeleteApi",
-          "apigatewayv2:TagResource"
+          "apigatewayv2:*",
         ],
         Resource = "*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "apigateway:GET",
+          "apigateway:POST",
+          "apigateway:DELETE",
+          "apigateway:PUT",
+        ],
+        "Resource": "arn:aws:apigateway:*"
       },
 
       # DynamoDB
       {
         Effect = "Allow",
         Action = [
-          "dynamodb:CreateTable",
-          "dynamodb:DeleteTable",
-          "dynamodb:DescribeTable",
-          "dynamodb:TagResource",
-          "dynamodb:DescribeContinuousBackups",
-          "dynamodb:ListTagsOfResource"
+          "dynamodb:*",
         ],
         Resource = "*"
       },
@@ -83,7 +71,14 @@ resource "aws_iam_policy" "deploy_policy" {
       {
         Effect = "Allow",
         Action = [
-          "iam:PassRole"
+          "iam:PassRole",
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
+          "iam:ListInstanceProfilesForRole",
+          "iam:DeleteRole",
+          "iam:GetRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:DeleteRolePolicy"
         ],
         Resource = "arn:aws:iam::${var.aws_account_id}:role/lambda_exec_role"
       },
@@ -95,7 +90,8 @@ resource "aws_iam_policy" "deploy_policy" {
           "iam:CreateRole",
           "iam:PutRolePolicy",
           "iam:AttachRolePolicy",
-          "iam:GetRole"
+          "iam:GetRole",
+          "iam:ListEntitiesForPolicy"
         ],
         Resource = "*"
       },
@@ -106,7 +102,12 @@ resource "aws_iam_policy" "deploy_policy" {
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
-          "logs:PutLogEvents"
+          "logs:PutLogEvents",
+          "logs:TagResource",
+          "logs:PutRetentionPolicy",
+          "logs:DescribeLogGroups",
+          "logs:ListTagsForResource",
+          "logs:DeleteLogGroup"
         ],
         Resource = "*"
       },
@@ -127,11 +128,7 @@ resource "aws_iam_policy" "deploy_policy" {
       {
         Effect = "Allow",
         Action = [
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:DeleteItem",
-          "dynamodb:DescribeTable",
-          "dynamodb:DescribeTimeToLive"
+          "dynamodb:*",
         ],
         Resource = "arn:aws:dynamodb:${var.aws_region}:${var.aws_account_id}:table/terraform-locks"
       }
