@@ -36,7 +36,9 @@ def test_put_user_failed(mock_storage):
 @patch("handler.storage")
 def test_get_user_today_birthday(mock_storage):
     today = datetime.now().strftime("%Y-%m-%d")
-    mock_storage.get_user.return_value = User(username="alice", dateOfBirth=today)
+    mock_storage.get_user.return_value = User(
+        username="alice", dateOfBirth=today
+    )
 
     event = get_event("GET", "alice")
     response = lambda_handler(event, {})
@@ -48,7 +50,9 @@ def test_get_user_today_birthday(mock_storage):
 @patch("handler.storage")
 def test_get_user_future_birthday(mock_storage):
     tomorrow = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
-    mock_storage.get_user.return_value = User(username="alice", dateOfBirth=tomorrow)
+    mock_storage.get_user.return_value = User(
+        username="alice", dateOfBirth=tomorrow
+    )
 
     event = get_event("GET", "alice")
     response = lambda_handler(event, {})

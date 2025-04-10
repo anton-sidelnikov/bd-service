@@ -23,7 +23,10 @@ class TestUtils(unittest.TestCase):
         prev_day = today - timedelta(days=1)
         self.assertEqual(days_until_next_birthday(today), 0)
         self.assertEqual(days_until_next_birthday(next_day), 1)
-        self.assertIn(days_until_next_birthday(prev_day), [364, 365])  # leap year edge
+        self.assertIn(
+            days_until_next_birthday(prev_day),
+            [364, 365]
+        )  # leap year edge
 
 
 if __name__ == "__main__":
