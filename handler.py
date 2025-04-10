@@ -20,13 +20,13 @@ def respond(status_code: int, message):
 
 
 def lambda_handler(event, context):
-    http_method = (event.get("httpMethod") or
-                   event.get("requestContext", {}).
-                   get("http", {}).
-                   get("method"))
-    username = (event.get("pathParameters", {}).
-                get("username") or
-                event.get("rawPath", "").rsplit("/", 1)[-1]).strip()
+    http_method = event.get("httpMethod") or event.get("requestContext", {}).get(
+        "http", {}
+    ).get("method")
+    username = (
+        event.get("pathParameters", {}).get("username")
+        or event.get("rawPath", "").rsplit("/", 1)[-1]
+    ).strip()
 
     if not is_valid_username(username):
         return respond(400, "Username must contain only letters.")
@@ -40,8 +40,7 @@ def lambda_handler(event, context):
 
         if not is_valid_dob(date_of_birth):
             return respond(
-                400,
-                "Invalid or future date of birth. Must be in YYYY-MM-DD format"
+                400, "Invalid or future date of birth. Must be in YYYY-MM-DD format"
             )
 
         storage.set_user(username, date_of_birth)
