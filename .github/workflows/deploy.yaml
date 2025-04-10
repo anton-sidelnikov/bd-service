@@ -34,7 +34,7 @@ jobs:
       - name: Check if remote state bucket exists
         id: state-check
         run: |
-          if aws s3api head-bucket --bucket my-birthday-tf-state 2>/dev/null; then
+          if aws s3api head-bucket --bucket bds-tf-state 2>/dev/null; then
             echo "state_bucket_exists=true" >> "$GITHUB_ENV"
           else
             echo "state_bucket_exists=false" >> "$GITHUB_ENV"
