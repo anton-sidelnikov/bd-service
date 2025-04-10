@@ -11,7 +11,6 @@ terraform {
     region         = "us-east-1"
     dynamodb_table = "terraform-locks" // need to be created before (ex. state-bootstrap.tf)
     encrypt        = true
-    lock_timeout   = "100s"
   }
 }
 
