@@ -75,7 +75,7 @@ jobs:
           cp requirements.txt build/
           cd build
           pip install -r requirements.txt -t .
-          zip -r ../lambda.zip .
+          zip -r lambda.zip .
           cd ..
           mv build/lambda.zip infra/lambda/lambda.zip
 
