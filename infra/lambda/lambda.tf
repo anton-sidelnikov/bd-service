@@ -14,8 +14,6 @@ resource "aws_lambda_function" "birthday" {
   }
 
   publish = true
-
-  reserved_concurrent_executions = 200
 }
 
 # Alias for prod
