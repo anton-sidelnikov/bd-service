@@ -20,7 +20,33 @@ resource "aws_iam_role" "lambda_exec" {
 
 resource "aws_iam_role_policy_attachment" "lambda_dynamo_policy" {
   role       = aws_iam_role.lambda_exec.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+  policy_arn = aws_iam_policy.dynamo_rw.arn
+}
+
+resource "aws_iam_policy" "dynamo_rw" {
+  name        = "dynamo_rw_policy_${terraform.workspace}"
+  description = "Read/write access to DynamoDB table used by the Lambda function"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Query",
+          "dynamodb:Scan"
+        ],
+        Resource = [
+          aws_dynamodb_table.users.arn,
+          "${aws_dynamodb_table.users.arn}/*"
+        ]
+      }
+    ]
+  })
 }
 
 resource "aws_iam_role_policy" "lambda_logging" {
