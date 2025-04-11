@@ -1,0 +1,75 @@
+name: Rollback Lambda (Prod)
+
+on:
+  workflow_dispatch:
+    inputs:
+      rollback_version:
+        description: "Lambda version to rollback to (leave blank for auto N-1)"
+        required: false
+        default: ""
+
+jobs:
+  rollback:
+    name: Rollback Lambda to Previous Version
+    runs-on: ubuntu-latest
+    environment: deploy
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS OIDC
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-oidc-terraform-deploy
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.5
+
+      - name: Init Terraform for prod
+        run: |
+          cd infra/lambda
+          terraform init -reconfigure -backend-config="key=lambda/prod.tfstate"
+          terraform workspace select prod
+
+      - name: Determine latest versions
+        id: lambda_versions
+        run: |
+          FUNC_NAME="birthday-service-prod"
+          echo "Fetching latest Lambda versions..."
+          VERSIONS=$(aws lambda list-versions-by-function --function-name $FUNC_NAME --query 'Versions[?Version!=`$LATEST`].[Version]' --output text | sort -n)
+          echo "All Versions: $VERSIONS"
+          ARR=($VERSIONS)
+          N=${#ARR[@]}
+          if [ -z "${{ github.event.inputs.rollback_version }}" ]; then
+            PREV_INDEX=$((N - 2))
+            if [ $PREV_INDEX -lt 0 ]; then
+              echo "No previous version to rollback to." && exit 1
+            fi
+            PREV_VERSION=${ARR[$PREV_INDEX]}
+          else
+            PREV_VERSION="${{ github.event.inputs.rollback_version }}"
+          fi
+          echo "Rolling back to version: $PREV_VERSION"
+          echo "version=$PREV_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Package Lambda function
+        run: |
+          pip install -r requirements.txt -t .
+          zip -r lambda.zip .
+          cd ..
+
+      - name: Update Lambda alias to previous version
+        run: |
+          cd infra/lambda
+          terraform apply \
+            -var aws_region=${{ secrets.AWS_REGION }} \
+            -var rollback_version=${{ steps.lambda_versions.outputs.version }} \
+            -var dns_name=prod.${{ secrets.DOMAIN_NAME }} \
+            -auto-approve
