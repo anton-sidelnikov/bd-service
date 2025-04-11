@@ -7,7 +7,7 @@ terraform {
   }
   backend "s3" {
     bucket         = "bds-tf-state" // need to be created before (ex. state-bootstrap.tf)
-    key            = "prod/terraform.tfstate"
+    key            = "lambda/${terraform.workspace}.tfstate"
     region         = "eu-central-1"
     dynamodb_table = "terraform-locks" // need to be created before (ex. state-bootstrap.tf)
     encrypt        = true

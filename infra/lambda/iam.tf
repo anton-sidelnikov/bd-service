@@ -14,13 +14,13 @@ resource "aws_iam_role" "lambda_exec" {
 }
 
 resource "aws_iam_policy_attachment" "lambda_dynamo_policy" {
-  name       = "attach-dynamo-policy"
+  name       = "attach_dynamo_policy"
   roles      = [aws_iam_role.lambda_exec.name]
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
 
 resource "aws_iam_role_policy" "lambda_logging" {
-  name = "LambdaLoggingPolicy"
+  name = "lambda_logging_policy"
   role = aws_iam_role.lambda_exec.id
 
   policy = jsonencode({

@@ -91,7 +91,8 @@ resource "aws_iam_policy" "deploy_policy" {
           "iam:PutRolePolicy",
           "iam:AttachRolePolicy",
           "iam:GetRole",
-          "iam:ListEntitiesForPolicy"
+          "iam:ListEntitiesForPolicy",
+          "iam:CreateServiceLinkedRole"
         ],
         Resource = "*"
       },
@@ -141,10 +142,25 @@ resource "aws_iam_policy" "deploy_policy" {
           "acm:DescribeCertificate",
           "acm:DeleteCertificate",
           "acm:ListCertificates",
-          "acm:AddTagsToCertificate"
+          "acm:AddTagsToCertificate",
+          "acm:ListTagsForCertificate"
         ],
         "Resource": "*"
-      }
+      },
+
+      # Route53
+      {
+        "Effect": "Allow",
+        "Action": [
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets",
+          "route53:GetHostedZone",
+          "route53:ListTagsForResource",
+          "route53:ChangeResourceRecordSets",
+          "route53:GetChange"
+        ],
+        "Resource": "*"
+      },
     ]
   })
 }
