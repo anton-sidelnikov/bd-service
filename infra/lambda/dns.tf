@@ -1,7 +1,7 @@
 locals {
   dns_parts     = split(".", var.dns_name)
   dns_zone_name = length(local.dns_parts) >= 2 ? join(".", slice(local.dns_parts, length(local.dns_parts) - 2, length(local.dns_parts))) : var.dns_name
-  validation_options = var.dns_name != "" ? to_list(aws_acm_certificate.api_cert[0].domain_validation_options) : []
+  validation_options = var.dns_name != "" ? tolist(aws_acm_certificate.api_cert[0].domain_validation_options) : []
 }
 
 # Only create the certificate if dns_name is provided
