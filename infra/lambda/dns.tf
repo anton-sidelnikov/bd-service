@@ -62,9 +62,7 @@ resource "aws_route53_record" "api_alias" {
 # Hosted zone lookup
 locals {
   dns_parts     = split(".", var.dns_name)
-  dns_zone_name = length(local.dns_parts) >= 2
-    ? join(".", slice(local.dns_parts, length(local.dns_parts) - 2, length(local.dns_parts)))
-    : var.dns_name
+  dns_zone_name = length(local.dns_parts) >= 2 ? join(".", slice(local.dns_parts, length(local.dns_parts) - 2, length(local.dns_parts))) : var.dns_name
 }
 
 data "aws_route53_zone" "primary" {
