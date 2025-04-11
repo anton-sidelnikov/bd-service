@@ -31,7 +31,7 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
 resource "aws_apigatewayv2_route" "route" {
   api_id    = aws_apigatewayv2_api.api.id
   route_key = "ANY /hello/{username}"
-  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration[0].id}"
 }
 
 resource "aws_apigatewayv2_stage" "default" {
