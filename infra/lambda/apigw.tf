@@ -29,6 +29,7 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
 }
 
 resource "aws_apigatewayv2_route" "route" {
+  count     = var.promote ? 1 : 0
   api_id    = aws_apigatewayv2_api.api.id
   route_key = "ANY /hello/{username}"
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration[0].id}"
