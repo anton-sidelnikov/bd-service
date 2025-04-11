@@ -12,6 +12,9 @@ on:
 jobs:
   # Deploy PR Test Environment
   test:
+    permissions:
+      id-token: write
+      contents: read
     if: github.event_name == 'pull_request'
     uses: ./.github/workflows/common.yaml
     with:
@@ -23,6 +26,9 @@ jobs:
 
   # Destroy PR Test Environment
   destroy-test:
+    permissions:
+      id-token: write
+      contents: read
     if: github.event.pull_request.merged == true || github.event.pull_request.state == 'closed'
     needs: test
     uses: ./.github/workflows/common.yaml
@@ -35,6 +41,9 @@ jobs:
 
   # Deploy Production on Tag/Release
   production:
+    permissions:
+      id-token: write
+      contents: read
     if: github.event_name == 'release'
     uses: ./.github/workflows/common.yaml
     with:
@@ -46,6 +55,9 @@ jobs:
 
   # Destroy Production (manual only)
   destroy-prod:
+    permissions:
+      id-token: write
+      contents: read
     if: github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner
     uses: ./.github/workflows/common.yaml
     with:
