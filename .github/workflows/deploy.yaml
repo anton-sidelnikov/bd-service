@@ -13,7 +13,7 @@ jobs:
   # Deploy PR Test Environment
   test:
     if: github.event_name == 'pull_request'
-    uses: ./.github/workflows/common.yml
+    uses: ./.github/workflows/common.yaml
     with:
       workspace: pr-${{ github.event.pull_request.number }}
       backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate
@@ -25,7 +25,7 @@ jobs:
   destroy-test:
     if: github.event.pull_request.merged == true || github.event.pull_request.state == 'closed'
     needs: test
-    uses: ./.github/workflows/common.yml
+    uses: ./.github/workflows/common.yaml
     with:
       workspace: pr-${{ github.event.pull_request.number }}
       backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate
@@ -36,7 +36,7 @@ jobs:
   # Deploy Production on Tag/Release
   production:
     if: github.event_name == 'release'
-    uses: ./.github/workflows/common.yml
+    uses: ./.github/workflows/common.yaml
     with:
       workspace: prod
       backend_key: lambda/prod.tfstate
@@ -47,7 +47,7 @@ jobs:
   # Destroy Production (manual only)
   destroy-prod:
     if: github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner
-    uses: ./.github/workflows/common.yml
+    uses: ./.github/workflows/common.yaml
     with:
       workspace: prod
       backend_key: lambda/prod.tfstate
