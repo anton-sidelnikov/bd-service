@@ -75,6 +75,7 @@ jobs:
             --function-name $FUNC_NAME \
             --qualifier $VERSION \
             --payload '{"httpMethod":"GET","rawPath":"/hello/TestDeployHealthCheck"}' \
+            --cli-binary-format raw-in-base64-out \
             out.json \
             --query 'StatusCode' \
             --output text)
@@ -83,7 +84,7 @@ jobs:
           cat out.json
           echo "StatusCode: $STATUS"
 
-          if [ "$STATUS" != "404" ]; then
+          if [ "$STATUS" != "200" ]; then
             echo "❌ Health check failed. Aborting alias promotion."
             exit 1
           fi
