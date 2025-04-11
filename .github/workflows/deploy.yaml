@@ -54,6 +54,7 @@ jobs:
         run: |
           pip install -r requirements.txt -t .
           zip -r ../lambda.zip .
+          cd ..
 
       - name: Init workspace
         run: |
@@ -111,6 +112,7 @@ jobs:
         run: |
           pip install -r requirements.txt -t .
           zip -r ../lambda.zip .
+          cd ..
 
       - name: Destroy test workspace
         run: |
@@ -165,6 +167,7 @@ jobs:
         run: |
           pip install -r requirements.txt -t .
           zip -r ../lambda.zip .
+          cd ..
 
       - name: Init and Select prod workspace
         run: |
