@@ -2,8 +2,8 @@ import json
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-from src.handler import lambda_handler
-from src.model import User
+from handler import lambda_handler
+from model import User
 
 
 def get_event(http_method, username, body=None):
@@ -14,7 +14,7 @@ def get_event(http_method, username, body=None):
     }
 
 
-@patch("src.handler.storage")
+@patch("handler.storage")
 def test_put_user_success(mock_storage):
     event = get_event("PUT", "Alice", {"dateOfBirth": "1990-06-01"})
     mock_storage.set_user.return_value = None
@@ -23,7 +23,7 @@ def test_put_user_success(mock_storage):
     mock_storage.set_user.assert_called_once()
 
 
-@patch("src.handler.storage")
+@patch("handler.storage")
 def test_put_user_failed(mock_storage):
     event = get_event("PUT", "Alice", "")
     mock_storage.set_user.return_value = None
@@ -33,7 +33,7 @@ def test_put_user_failed(mock_storage):
     mock_storage.set_user.assert_not_called()
 
 
-@patch("src.handler.storage")
+@patch("handler.storage")
 def test_get_user_today_birthday(mock_storage):
     today = datetime.now().strftime("%Y-%m-%d")
     mock_storage.get_user.return_value = User(username="alice", dateOfBirth=today)
@@ -45,7 +45,7 @@ def test_get_user_today_birthday(mock_storage):
     assert "Happy birthday" in body["message"]
 
 
-@patch("src.handler.storage")
+@patch("handler.storage")
 def test_get_user_future_birthday(mock_storage):
     tomorrow = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
     mock_storage.get_user.return_value = User(username="alice", dateOfBirth=tomorrow)
