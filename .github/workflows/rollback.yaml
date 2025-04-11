@@ -59,6 +59,12 @@ jobs:
           echo "Rolling back to version: $PREV_VERSION"
           echo "version=$PREV_VERSION" >> $GITHUB_OUTPUT
 
+      - name: Package Lambda function
+        run: |
+          pip install -r requirements.txt -t .
+          zip -r lambda.zip .
+          cd ..
+
       - name: Update Lambda alias to previous version
         run: |
           cd infra/lambda
