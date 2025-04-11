@@ -10,6 +10,7 @@ resource "aws_apigatewayv2_api" "api" {
 }
 
 resource "aws_lambda_permission" "apigw_invoke" {
+  count         = var.promote ? 1 : 0
   statement_id  = "AllowInvoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.birthday.arn
@@ -19,6 +20,7 @@ resource "aws_lambda_permission" "apigw_invoke" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
+  count              = var.promote ? 1 : 0
   api_id             = aws_apigatewayv2_api.api.id
   integration_type   = "AWS_PROXY"
   integration_uri    = aws_lambda_alias.alias[0].invoke_arn
