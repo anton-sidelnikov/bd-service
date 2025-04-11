@@ -11,6 +11,7 @@ on:
 
 jobs:
   test:
+    environment: deploy
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     name: Deploy PR Test Environment
@@ -45,6 +46,7 @@ jobs:
           terraform apply -var aws_region=${{ secrets.AWS_REGION }} -var dns_name=${{ github.event.pull_request.number }}.${{ secrets.DOMAIN_NAME }} -auto-approve
 
   destroy-test:
+    environment: deploy
     if: github.event.pull_request.merged == true || github.event.pull_request.state == 'closed'
     runs-on: ubuntu-latest
     name: Destroy PR Test Environment
@@ -73,6 +75,7 @@ jobs:
           terraform workspace delete pr-${{ github.event.pull_request.number }}
 
   production:
+    environment: deploy
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
     name: Deploy to Production
