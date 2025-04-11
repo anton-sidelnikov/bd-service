@@ -80,7 +80,7 @@ resource "aws_iam_policy" "deploy_policy" {
           "iam:DetachRolePolicy",
           "iam:DeleteRolePolicy"
         ],
-        Resource = "arn:aws:iam::${var.aws_account_id}:role/lambda_exec_role"
+        Resource = "arn:aws:iam::${var.aws_account_id}:role/lambda_exec_role*"
       },
 
       # IAM for execution role
