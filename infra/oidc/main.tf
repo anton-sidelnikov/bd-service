@@ -131,6 +131,19 @@ resource "aws_iam_policy" "deploy_policy" {
           "dynamodb:*",
         ],
         Resource = "arn:aws:dynamodb:${var.aws_region}:${var.aws_account_id}:table/terraform-locks"
+      },
+
+      # ACM Certificate Management
+      {
+        "Effect": "Allow",
+        "Action": [
+          "acm:RequestCertificate",
+          "acm:DescribeCertificate",
+          "acm:DeleteCertificate",
+          "acm:ListCertificates",
+          "acm:AddTagsToCertificate"
+        ],
+        "Resource": "*"
       }
     ]
   })

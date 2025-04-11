@@ -57,4 +57,4 @@ jobs:
         run: |
           cd infra/lambda
           terraform init -reconfigure
-          terraform apply -var aws_region=${{ secrets.AWS_REGION }} -auto-approve
+          terraform apply -var aws_region=${{ secrets.AWS_REGION }} -var dns_name=${{ secrets.DOMAIN_NAME }} -auto-approve
