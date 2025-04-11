@@ -17,7 +17,7 @@ jobs:
     with:
       workspace: pr-${{ github.event.pull_request.number }}
       backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate
-      dns_name: ${{ github.event.pull_request.number }}.${{ secrets.DOMAIN_NAME }}
+      dns_prefix: ${{ github.event.pull_request.number }}
       action: apply
     secrets: inherit
 
@@ -29,7 +29,7 @@ jobs:
     with:
       workspace: pr-${{ github.event.pull_request.number }}
       backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate
-      dns_name: ${{ github.event.pull_request.number }}.${{ secrets.DOMAIN_NAME }}
+      dns_prefix: ${{ github.event.pull_request.number }}
       action: destroy
     secrets: inherit
 
@@ -40,7 +40,7 @@ jobs:
     with:
       workspace: prod
       backend_key: lambda/prod.tfstate
-      dns_name: ${{ secrets.DOMAIN_NAME }}
+      dns_prefix: prod
       action: apply
     secrets: inherit
 
@@ -51,6 +51,6 @@ jobs:
     with:
       workspace: prod
       backend_key: lambda/prod.tfstate
-      dns_name: ${{ secrets.DOMAIN_NAME }}
+      dns_prefix: prod
       action: destroy
     secrets: inherit

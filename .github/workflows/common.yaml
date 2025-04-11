@@ -6,7 +6,7 @@ on:
       workspace:
         required: true
         type: string
-      dns_name:
+      dns_prefix:
         required: false
         type: string
         default: ""
@@ -76,9 +76,9 @@ jobs:
           terraform workspace new ${{ inputs.workspace }} || terraform workspace select ${{ inputs.workspace }}
 
           if [ "${{ inputs.action }}" = "apply" ]; then
-            terraform apply -var aws_region=${{ secrets.AWS_REGION }} -var dns_name=${{ inputs.dns_name }} -auto-approve
+            terraform apply -var aws_region=${{ secrets.AWS_REGION }} -var dns_name="${{ inputs.workspace }}.${{ secrets.DOMAIN_NAME }}" -auto-approve
           elif [ "${{ inputs.action }}" = "destroy" ]; then
-            terraform destroy -var aws_region=${{ secrets.AWS_REGION }} -var dns_name=${{ inputs.dns_name }} -auto-approve
+            terraform destroy -var aws_region=${{ secrets.AWS_REGION }} -var dns_name="${{ inputs.workspace }}.${{ secrets.DOMAIN_NAME }}" -auto-approve
             terraform workspace select default
             terraform workspace delete ${{ inputs.workspace }}
           else
