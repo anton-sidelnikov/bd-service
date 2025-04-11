@@ -48,7 +48,7 @@ resource "aws_apigatewayv2_api_mapping" "mapping" {
 # DNS record pointing to API Gateway custom domain
 resource "aws_route53_record" "api_alias" {
   count   = var.dns_name != "" ? 1 : 0
-  zone_id = data.aws_route53_zone.primary.zone_id
+  zone_id = data.aws_route53_zone.primary[0].zone_id
   name    = var.dns_name
   type    = "A"
 
