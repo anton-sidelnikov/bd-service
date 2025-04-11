@@ -21,12 +21,12 @@ def respond(status_code: int, message):
 
 def lambda_handler(event, context):
     http_method = (
-            event.get("httpMethod") or
-            event.get("requestContext", {}).get("http", {}).get("method")
+        event.get("httpMethod")
+        or event.get("requestContext", {}).get("http", {}).get("method")
     )
     username = (
-        event.get("pathParameters", {}).get("username") or
-        event.get("rawPath", "").rsplit("/", 1)[-1]
+        event.get("pathParameters", {}).get("username")
+        or event.get("rawPath", "").rsplit("/", 1)[-1]
     ).strip()
 
     if not is_valid_username(username):

@@ -60,8 +60,15 @@ resource "aws_route53_record" "api_alias" {
 }
 
 # Hosted zone lookup
+locals {
+  dns_parts     = split(".", var.dns_name)
+  dns_zone_name = length(local.dns_parts) >= 2
+    ? join(".", slice(local.dns_parts, length(local.dns_parts) - 2, length(local.dns_parts)))
+    : var.dns_name
+}
+
 data "aws_route53_zone" "primary" {
-  count   = var.dns_name != "" ? 1 : 0
-  name    = join(".", slice(split(".", var.dns_name), -2, length(split(".", var.dns_name)))) # e.g., example.com
+  count        = var.dns_name != "" ? 1 : 0
+  name         = local.dns_zone_name
   private_zone = false
 }
