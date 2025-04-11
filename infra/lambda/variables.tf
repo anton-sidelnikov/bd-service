@@ -16,3 +16,9 @@ variable "dns_name" {
   description = "Custom domain name to assign to API (e.g. api.example.com). Leave blank to skip custom DNS."
   default     = ""
 }
+
+variable "rollback_version" {
+  description = "Manual rollback version override"
+  type        = string
+  default     = ""
+}

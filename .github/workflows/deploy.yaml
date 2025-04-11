@@ -24,7 +24,7 @@ jobs:
       action: apply
     secrets: inherit
 
-  # Destroy PR Test Environment
+  # Destroy PR Test Environment after merge
   destroy-test:
     permissions:
       id-token: write
@@ -54,7 +54,7 @@ jobs:
     secrets: inherit
 
   # Destroy Production (manual only)
-  destroy-prod:
+  destroy-production:
     permissions:
       id-token: write
       contents: read

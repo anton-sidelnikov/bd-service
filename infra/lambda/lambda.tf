@@ -25,8 +25,8 @@ resource "aws_lambda_function" "birthday" {
 resource "aws_lambda_alias" "alias" {
   name             = terraform.workspace == "prod" ? "prod" : terraform.workspace
   function_name    = aws_lambda_function.birthday.function_name
-  function_version = aws_lambda_function.birthday.version
-  description      = "Production alias"
+  function_version = var.rollback_version != "" ? var.rollback_version : aws_lambda_function.birthday.version
+  description      = "alias"
 }
 
 resource "aws_cloudwatch_log_group" "lambda_logs" {
