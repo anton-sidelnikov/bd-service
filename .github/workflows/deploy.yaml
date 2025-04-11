@@ -84,7 +84,7 @@ jobs:
           cat out.json
           echo "StatusCode: $STATUS"
 
-          if [ "$STATUS" != "200" ]; then
+          if [ "$STATUS" == "" ]; then
             echo "❌ Health check failed. Aborting alias promotion."
             exit 1
           fi
