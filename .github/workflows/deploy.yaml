@@ -90,7 +90,7 @@ jobs:
           fi
 
       - name: Promote Alias to Validated Version
-        uses: ./.github/workflows/common.yaml
+        uses: ./.github/workflows/common.yaml@${{ github.ref_name }}
         with:
           workspace: pr-${{ github.event.pull_request.number }}
           backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate

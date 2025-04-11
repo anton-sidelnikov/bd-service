@@ -100,6 +100,18 @@ resource "aws_iam_policy" "deploy_policy" {
         Resource = "*"
       },
 
+      {
+        Effect = "Allow",
+        Action = [
+          "iam:CreatePolicy",
+          "iam:DeletePolicy",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:ListPolicyVersions"
+        ],
+        Resource = "arn:aws:iam::${var.aws_account_id}:policy/dynamo_rw_policy*"
+      },
+
       # CloudWatch Logs (for Lambda)
       {
         Effect = "Allow",
