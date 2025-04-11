@@ -69,11 +69,13 @@ jobs:
 
       - name: Package Lambda function
         run: |
-          mkdir build
-          cp **/*.py /build
+          set -e
+          mkdir -p build
+          cp *.py build/
+          cp requirements.txt build/
           cd build
           pip install -r requirements.txt -t .
-          zip -r lambda.zip .
+          zip -r ../lambda.zip .
           cd ..
 
       - name: Run Terraform (Apply or Destroy)
