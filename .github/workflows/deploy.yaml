@@ -37,7 +37,7 @@ jobs:
       - name: Init workspace
         run: |
           cd infra/lambda
-          terraform init -reconfigure -backend-config="key=lambda/pr-${{ github.event.pull_request.number }}.tfstate" -backend-config="${{ secrets.AWS_REGION }}"
+          terraform init -reconfigure -backend-config="key=lambda/pr-${{ github.event.pull_request.number }}.tfstate"
           terraform workspace new pr-${{ github.event.pull_request.number }} || terraform workspace select pr-${{ github.event.pull_request.number }}
 
       - name: Apply Test Infra
@@ -68,7 +68,7 @@ jobs:
       - name: Destroy test workspace
         run: |
           cd infra/lambda
-          terraform init -reconfigure -backend-config="key=lambda/pr-${{ github.event.pull_request.number }}.tfstate" -backend-config="${{ secrets.AWS_REGION }}"
+          terraform init -reconfigure -backend-config="key=lambda/pr-${{ github.event.pull_request.number }}.tfstate"
           terraform workspace select pr-${{ github.event.pull_request.number }}
           terraform destroy -var aws_region=${{ secrets.AWS_REGION }} -auto-approve
           terraform workspace select default
@@ -101,7 +101,7 @@ jobs:
       - name: Init and Select prod workspace
         run: |
           cd infra/lambda
-          terraform init -reconfigure -backend-config="key=lambda/prod.tfstate" -backend-config="${{ secrets.AWS_REGION }}"
+          terraform init -reconfigure -backend-config="key=lambda/prod.tfstate"
           terraform workspace new prod || terraform workspace select prod
 
       - name: Deploy Production Infra
