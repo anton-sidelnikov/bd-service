@@ -12,6 +12,11 @@ resource "aws_acm_certificate" "api_cert" {
   lifecycle {
     create_before_destroy = true
   }
+
+  tags = {
+    Environment = terraform.workspace
+    Project     = "birthday-service"
+  }
 }
 
 # DNS validation record
@@ -23,6 +28,11 @@ resource "aws_route53_record" "cert_validation" {
   zone_id = data.aws_route53_zone.primary[0].zone_id
   records = [local.validation_options[count.index].resource_record_value]
   ttl     = 60
+
+  tags = {
+    Environment = terraform.workspace
+    Project     = "birthday-service"
+  }
 }
 
 # Confirm cert validation
@@ -30,6 +40,11 @@ resource "aws_acm_certificate_validation" "api_cert_validation" {
   count                   = var.dns_name != "" ? 1 : 0
   certificate_arn         = aws_acm_certificate.api_cert[0].arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+
+  tags = {
+    Environment = terraform.workspace
+    Project     = "birthday-service"
+  }
 }
 
 # API Gateway custom domain
@@ -41,6 +56,11 @@ resource "aws_apigatewayv2_domain_name" "custom" {
     endpoint_type   = "REGIONAL"
     security_policy = "TLS_1_2"
   }
+
+  tags = {
+    Environment = terraform.workspace
+    Project     = "birthday-service"
+  }
 }
 
 # API mapping to custom domain
@@ -49,6 +69,11 @@ resource "aws_apigatewayv2_api_mapping" "mapping" {
   api_id      = aws_apigatewayv2_api.api.id
   domain_name = aws_apigatewayv2_domain_name.custom[0].id
   stage       = aws_apigatewayv2_stage.default.name
+
+  tags = {
+    Environment = terraform.workspace
+    Project     = "birthday-service"
+  }
 }
 
 # DNS record pointing to API Gateway custom domain
@@ -62,6 +87,11 @@ resource "aws_route53_record" "api_alias" {
     name                   = aws_apigatewayv2_domain_name.custom[0].domain_name_configuration[0].target_domain_name
     zone_id                = aws_apigatewayv2_domain_name.custom[0].domain_name_configuration[0].hosted_zone_id
     evaluate_target_health = false
+  }
+
+  tags = {
+    Environment = terraform.workspace
+    Project     = "birthday-service"
   }
 }
 

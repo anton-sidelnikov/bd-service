@@ -14,6 +14,11 @@ resource "aws_lambda_function" "birthday" {
   }
 
   publish = true
+
+  tags = {
+    Environment = terraform.workspace
+    Project     = "birthday-service"
+  }
 }
 
 # Alias for prod
@@ -22,6 +27,11 @@ resource "aws_lambda_alias" "alias" {
   function_name    = aws_lambda_function.birthday.function_name
   function_version = aws_lambda_function.birthday.version
   description      = "Production alias"
+
+  tags = {
+    Environment = terraform.workspace
+    Project     = "birthday-service"
+  }
 }
 
 resource "aws_cloudwatch_log_group" "lambda_logs" {
@@ -29,7 +39,7 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
   retention_in_days = 3
 
   tags = {
-    Name        = "Birthday Lambda Logs"
     Environment = terraform.workspace
+    Project     = "birthday-service"
   }
 }

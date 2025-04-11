@@ -8,4 +8,9 @@ resource "aws_dynamodb_table" "users" {
     name = "username"
     type = "S"
   }
+
+  tags = {
+    Environment = terraform.workspace
+    Project     = "birthday-service"
+  }
 }

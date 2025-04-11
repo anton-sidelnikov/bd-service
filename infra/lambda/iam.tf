@@ -11,12 +11,22 @@ resource "aws_iam_role" "lambda_exec" {
       }
     }]
   })
+
+  tags = {
+    Environment = terraform.workspace
+    Project     = "birthday-service"
+  }
 }
 
 resource "aws_iam_policy_attachment" "lambda_dynamo_policy" {
   name       = "attach_dynamo_policy-${terraform.workspace}"
   roles      = [aws_iam_role.lambda_exec.name]
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+
+  tags = {
+    Environment = terraform.workspace
+    Project     = "birthday-service"
+  }
 }
 
 resource "aws_iam_role_policy" "lambda_logging" {
@@ -37,4 +47,9 @@ resource "aws_iam_role_policy" "lambda_logging" {
       }
     ]
   })
+
+  tags = {
+    Environment = terraform.workspace
+    Project     = "birthday-service"
+  }
 }
