@@ -1,3 +1,9 @@
+locals {
+  dns_parts     = split(".", var.dns_name)
+  dns_zone_name = length(local.dns_parts) >= 2 ? join(".", slice(local.dns_parts, length(local.dns_parts) - 2, length(local.dns_parts))) : var.dns_name
+  validation_options = var.dns_name != "" ? to_list(aws_acm_certificate.api_cert[0].domain_validation_options) : []
+}
+
 # Only create the certificate if dns_name is provided
 resource "aws_acm_certificate" "api_cert" {
   count               = var.dns_name != "" ? 1 : 0
@@ -10,12 +16,12 @@ resource "aws_acm_certificate" "api_cert" {
 
 # DNS validation record
 resource "aws_route53_record" "cert_validation" {
-  count   = var.dns_name != "" ? length(aws_acm_certificate.api_cert[0].domain_validation_options) : 0
+  count = var.dns_name != "" ? length(local.validation_options) : 0
 
-  name    = aws_acm_certificate.api_cert[0].domain_validation_options[count.index].resource_record_name
-  type    = aws_acm_certificate.api_cert[0].domain_validation_options[count.index].resource_record_type
+  name    = local.validation_options[count.index].resource_record_name
+  type    = local.validation_options[count.index].resource_record_type
   zone_id = data.aws_route53_zone.primary[0].zone_id
-  records = [aws_acm_certificate.api_cert[0].domain_validation_options[count.index].resource_record_value]
+  records = [local.validation_options[count.index].resource_record_value]
   ttl     = 60
 }
 
@@ -60,11 +66,6 @@ resource "aws_route53_record" "api_alias" {
 }
 
 # Hosted zone lookup
-locals {
-  dns_parts     = split(".", var.dns_name)
-  dns_zone_name = length(local.dns_parts) >= 2 ? join(".", slice(local.dns_parts, length(local.dns_parts) - 2, length(local.dns_parts))) : var.dns_name
-}
-
 data "aws_route53_zone" "primary" {
   count        = var.dns_name != "" ? 1 : 0
   name         = local.dns_zone_name
