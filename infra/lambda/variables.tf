@@ -5,7 +5,7 @@ variable "dynamodb_table_name" {
 
 variable "lambda_package" {
   description = "Path to zipped Lambda function"
-  default     = "../../build/lambda.zip"
+  default     = "lambda.zip"
 }
 
 variable "aws_region" {
