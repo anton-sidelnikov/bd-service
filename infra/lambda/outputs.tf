@@ -1,5 +1,5 @@
 output "service_url" {
-  value       = var.dns_name != "" ? "https://${terraform.workspace}.${var.dns_name}/hello/{username}" : aws_apigatewayv2_api.api.api_endpoint
+  value       = var.dns_name != "" ? "https://${var.dns_name}/hello/{username}" : aws_apigatewayv2_api.api.api_endpoint
   description = "Public URL for the Birthday service"
 }
 

@@ -54,6 +54,7 @@ resource "aws_iam_policy" "deploy_policy" {
           "apigateway:POST",
           "apigateway:DELETE",
           "apigateway:PUT",
+          "apigateway:PATCH"
         ],
         "Resource": "arn:aws:apigateway:*"
       },
@@ -78,7 +79,8 @@ resource "aws_iam_policy" "deploy_policy" {
           "iam:DeleteRole",
           "iam:GetRolePolicy",
           "iam:DetachRolePolicy",
-          "iam:DeleteRolePolicy"
+          "iam:DeleteRolePolicy",
+          "iam:TagRole"
         ],
         Resource = "arn:aws:iam::${var.aws_account_id}:role/lambda_exec_role*"
       },

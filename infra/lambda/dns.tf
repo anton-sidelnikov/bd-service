@@ -1,5 +1,5 @@
 locals {
-  dns_parts     = split(".", "${terraform.workspace}.${var.dns_name}")
+  dns_parts     = split(".", var.dns_name)
   dns_zone_name = length(local.dns_parts) >= 2 ? join(".", slice(local.dns_parts, length(local.dns_parts) - 2, length(local.dns_parts))) : var.dns_name
   validation_options = var.dns_name != "" ? tolist(aws_acm_certificate.api_cert[0].domain_validation_options) : []
 }
@@ -7,7 +7,7 @@ locals {
 # Only create the certificate if dns_name is provided
 resource "aws_acm_certificate" "api_cert" {
   count               = var.dns_name != "" ? 1 : 0
-  domain_name         = "${terraform.workspace}.${var.dns_name}"
+  domain_name         = var.dns_name
   validation_method   = "DNS"
   lifecycle {
     create_before_destroy = true
@@ -40,7 +40,7 @@ resource "aws_acm_certificate_validation" "api_cert_validation" {
 # API Gateway custom domain
 resource "aws_apigatewayv2_domain_name" "custom" {
   count                       = var.dns_name != "" ? 1 : 0
-  domain_name                 = "${terraform.workspace}.${var.dns_name}"
+  domain_name                 = var.dns_name
   domain_name_configuration {
     certificate_arn = aws_acm_certificate_validation.api_cert_validation[0].certificate_arn
     endpoint_type   = "REGIONAL"
@@ -65,7 +65,7 @@ resource "aws_apigatewayv2_api_mapping" "mapping" {
 resource "aws_route53_record" "api_alias" {
   count   = var.dns_name != "" ? 1 : 0
   zone_id = data.aws_route53_zone.primary[0].zone_id
-  name    = "${terraform.workspace}.${var.dns_name}"
+  name    = var.dns_name
   type    = "A"
 
   alias {
