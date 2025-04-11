@@ -110,7 +110,8 @@ resource "aws_iam_policy" "deploy_policy" {
           "logs:PutRetentionPolicy",
           "logs:DescribeLogGroups",
           "logs:ListTagsForResource",
-          "logs:DeleteLogGroup"
+          "logs:DeleteLogGroup",
+          "logs:UntagResource"
         ],
         Resource = "*"
       },

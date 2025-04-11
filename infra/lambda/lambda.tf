@@ -30,7 +30,7 @@ resource "aws_lambda_alias" "alias" {
 }
 
 resource "aws_cloudwatch_log_group" "lambda_logs" {
-  name              = "/aws/lambda/${aws_lambda_function.birthday.function_name}-${terraform.workspace}"
+  name              = "/aws/lambda/${aws_lambda_function.birthday.function_name}"
   retention_in_days = 3
 
   tags = {
