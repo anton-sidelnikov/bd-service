@@ -10,6 +10,10 @@ on:
         required: false
         type: string
         default: ""
+      promote:
+        required: false
+        type: boolean
+        default: false
       backend_key:
         required: true
         type: string
@@ -65,6 +69,9 @@ jobs:
 
       - name: Package Lambda function
         run: |
+          mkdir build
+          cp **/*.py /build
+          cd build
           pip install -r requirements.txt -t .
           zip -r lambda.zip .
           cd ..
@@ -76,7 +83,7 @@ jobs:
           terraform workspace new ${{ inputs.workspace }} || terraform workspace select ${{ inputs.workspace }}
 
           if [ "${{ inputs.action }}" = "apply" ]; then
-            terraform apply -var aws_region=${{ secrets.AWS_REGION }} -var dns_name="${{ inputs.workspace }}.${{ secrets.DOMAIN_NAME }}" -auto-approve
+            terraform apply -var aws_region=${{ secrets.AWS_REGION }} -var dns_name="${{ inputs.workspace }}.${{ secrets.DOMAIN_NAME }}" -var promote=${{ inputs.promote }} -auto-approve
           elif [ "${{ inputs.action }}" = "destroy" ]; then
             terraform destroy -var aws_region=${{ secrets.AWS_REGION }} -var dns_name="${{ inputs.workspace }}.${{ secrets.DOMAIN_NAME }}" -auto-approve
             terraform workspace select default

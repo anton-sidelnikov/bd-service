@@ -1,0 +1,20 @@
+name: Cleanup PR Environment
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  # Destroy PR Test Environment after merge
+  destroy-test:
+    permissions:
+      id-token: write
+      contents: read
+    if: github.event.pull_request.merged == true || github.event.pull_request.state == 'closed'
+    uses: ./.github/workflows/common.yaml
+    with:
+      workspace: pr-${{ github.event.pull_request.number }}
+      backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate
+      dns_prefix: ${{ github.event.pull_request.number }}
+      action: destroy
+    secrets: inherit

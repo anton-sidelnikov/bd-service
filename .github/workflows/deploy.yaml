@@ -20,23 +20,9 @@ jobs:
     with:
       workspace: pr-${{ github.event.pull_request.number }}
       backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate
-      dns_prefix: ${{ github.event.pull_request.number }}
+      dns_prefix: pr-${{ github.event.pull_request.number }}
       action: apply
-    secrets: inherit
-
-  # Destroy PR Test Environment after merge
-  destroy-test:
-    permissions:
-      id-token: write
-      contents: read
-    if: github.event.pull_request.merged == true || github.event.pull_request.state == 'closed'
-    needs: test
-    uses: ./.github/workflows/common.yaml
-    with:
-      workspace: pr-${{ github.event.pull_request.number }}
-      backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate
-      dns_prefix: ${{ github.event.pull_request.number }}
-      action: destroy
+      promote: false  # ⛔ Do not switch alias
     secrets: inherit
 
   # Deploy Production on Tag/Release
@@ -53,16 +39,60 @@ jobs:
       action: apply
     secrets: inherit
 
-  # Destroy Production (manual only)
-  destroy-production:
+  # Promote to Alias after Health Check
+  promote:
+    needs: test
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-    if: github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner
-    uses: ./.github/workflows/common.yaml
-    with:
-      workspace: prod
-      backend_key: lambda/prod.tfstate
-      dns_prefix: prod
-      action: destroy
-    secrets: inherit
+    if: github.event_name == 'pull_request'
+    environment: deploy
+
+    steps:
+      - name: Configure AWS OIDC
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-oidc-terraform-deploy
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Determine Latest Lambda Version
+        id: latest_version
+        run: |
+          FUNC_NAME="birthday_service-pr-${{ github.event.pull_request.number }}"
+          VERSIONS=$(aws lambda list-versions-by-function --function-name $FUNC_NAME --query 'Versions[?Version!=`$LATEST`].[Version]' --output text | sort -n)
+          VERSION=$(echo "$VERSIONS" | tail -n1)
+          echo "Latest version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Run Health Check
+        run: |
+          FUNC_NAME="birthday_service-pr-${{ github.event.pull_request.number }}"
+          VERSION=${{ steps.latest_version.outputs.version }}
+          echo "Running health check on version $VERSION..."
+
+          STATUS=$(aws lambda invoke \
+            --function-name $FUNC_NAME \
+            --qualifier $VERSION \
+            --payload '{"httpMethod":"GET","rawPath":"/hello/TestDeployHealthCheck"}' \
+            out.json \
+            --query 'StatusCode' \
+            --output text)
+
+          echo "Response:"
+          cat out.json
+          echo "StatusCode: $STATUS"
+
+          if [ "$STATUS" != "404" ]; then
+            echo "❌ Health check failed. Aborting alias promotion."
+            exit 1
+          fi
+
+      - name: Promote Alias to Validated Version
+        uses: ./.github/workflows/common.yaml
+        with:
+          workspace: pr-${{ github.event.pull_request.number }}
+          backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate
+          dns_prefix: pr-${{ github.event.pull_request.number }}
+          action: apply
+          promote: true

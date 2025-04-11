@@ -54,7 +54,8 @@ resource "aws_iam_policy" "deploy_policy" {
           "apigateway:POST",
           "apigateway:DELETE",
           "apigateway:PUT",
-          "apigateway:PATCH"
+          "apigateway:PATCH",
+          "apigateway:TagResource"
         ],
         "Resource": "arn:aws:apigateway:*"
       },

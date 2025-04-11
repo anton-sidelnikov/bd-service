@@ -153,4 +153,3 @@ DynamoDB does not include backups by default.
 | **CloudWatch Alarms**                            | Alert on Lambda/API errors               |
 | **WAF + API Gateway for IP-based rate limiting** | Prevent abuse                            |
 | **DynamoDB Backup Strategy**                     | Data availability and durability         |
-| **Terraform Workspaces**                         | Support multiple environments (dev/prod) |
