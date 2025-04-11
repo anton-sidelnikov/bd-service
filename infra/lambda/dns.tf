@@ -28,11 +28,6 @@ resource "aws_route53_record" "cert_validation" {
   zone_id = data.aws_route53_zone.primary[0].zone_id
   records = [local.validation_options[count.index].resource_record_value]
   ttl     = 60
-
-  tags = {
-    Environment = terraform.workspace
-    Project     = "birthday-service"
-  }
 }
 
 # Confirm cert validation
