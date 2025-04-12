@@ -79,7 +79,9 @@ utils.py               # utility functions
 requirements.txt
 ```
 
-### Setup Instructions
+## Setup Instructions 
+
+### GitHub
 
 #### Step 1: GitHub OIDC Provider (Only Manual)
 First need to install aws cli tool.
@@ -93,6 +95,7 @@ aws iam create-open-id-connect-provider \
 Run once per AWS account. Required for GitHub Actions authentication.
 
 #### Step 2: Deploy OIDC IAM Role & Policy (Only Manual)
+
 ```bash
 cd infra/oidc
 terraform init
@@ -103,6 +106,7 @@ terraform apply -var aws_region="eu-central-1" -var aws_account_id=1234567890
   +	Deploy policy: scoped to only needed AWS services
 
 #### Step 3: Bootstrap Remote State (One-time, could be done by CI/CD)
+
 ```bash
 cd infra/bootstrap
 terraform init
@@ -113,10 +117,62 @@ terraform apply -var aws_region="eu-central-1"
   +	DynamoDB lock table
 
 #### Step 4: Deploy App Infrastructure (Lambda + API, could be done by CI/CD)
+
 ```bash
 cd infra/lambda
 terraform init -reconfigure
 terraform apply -var aws_region="eu-central-1" -var dns_name="example.com"
+```
+If dns_name is blank, skips custom DNS setup.
+
+### Local
+
+#### Step 1: Configure AWS Credentials and Config
+
+Files must be placed in `.aws` folder
+
+**credentials**
+```text
+[default]
+aws_access_key_id=AKIATWIUNHMTHBEXAMPLE
+aws_secret_access_key=D0BXE8yV6Zj!A0uFzW3VyxhrVLGtjW82EXAMPLE
+```
+**config**
+```text
+[default]
+region=eu-central-1
+output=json
+```
+
+#### Step 2: Bootstrap Remote State (One-time)
+
+```bash
+cd infra/bootstrap
+terraform init
+terraform apply -var aws_region="eu-central-1"
+```
+
+- Creates:
+  +	S3 bucket for Terraform state
+  +	DynamoDB lock table
+
+#### Step 3: Create Package for Lambda function
+
+Example:
+```bash
+cp *.py build/
+cp requirements.txt build/
+cd build
+pip install -r requirements.txt -t .
+zip -r lambda.zip .
+```
+
+#### Step 4: Deploy App Infrastructure (Lambda + API, etc.)
+
+```bash
+cd infra/lambda
+terraform init -reconfigure
+terraform apply -var aws_region="eu-central-1" -var dns_name="example.com" -var promote="true" -var lambda_package="path/lambda.zip"
 ```
 If dns_name is blank, skips custom DNS setup.
 
