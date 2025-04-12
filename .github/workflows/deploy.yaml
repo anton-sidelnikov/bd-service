@@ -90,7 +90,7 @@ jobs:
           fi
 
   promote:
-    needs: promote
+    needs: healthcheck
     permissions:
       id-token: write
       contents: read
