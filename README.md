@@ -48,7 +48,7 @@ Main:
 API Gateway (HTTP API)
    |
    v
-Lambda function
+Lambda function -> CloudWatch
    |
    v
 DynamoDB
@@ -105,7 +105,7 @@ terraform apply -var aws_region="eu-central-1" -var aws_account_id=1234567890
   +	IAM role: github-oidc-terraform-deploy
   +	Deploy policy: scoped to only needed AWS services
 
-#### Step 3: Bootstrap Remote State (One-time, could be done by CI/CD)
+#### Step 3: Bootstrap Remote State (CI/CD common.yaml)
 
 ```bash
 cd infra/bootstrap
@@ -116,7 +116,7 @@ terraform apply -var aws_region="eu-central-1"
   +	S3 bucket for Terraform state
   +	DynamoDB lock table
 
-#### Step 4: Deploy App Infrastructure (Lambda + API, could be done by CI/CD)
+#### Step 4: Deploy App Infrastructure (CI/CD deploy.yaml)
 
 ```bash
 cd infra/lambda
@@ -179,7 +179,7 @@ If dns_name is blank, skips custom DNS setup.
 ### Networking & Security
 
 App & DB Segregation
-  *	Lambda is public, but isolated and optionally VPC-enabled
+  *	Lambda is public, but isolated and optionally VPC-enabled (not our case)
   *	DynamoDB is IAM-secured, not exposed via network
   * API Gateway is HTTPS-only (optionally custom domain)
 
@@ -207,11 +207,26 @@ DynamoDB does not include backups by default.
  * Integrated with OIDC-authenticated deploy role
 
 ### Deployment Strategy
- * Lambda uses published versions + prod alias only after healthcheck passed
- * Zero downtime deploys via alias switching
- * Rollback by re-pointing alias to previous version
 
-### Optional Enhancements/Features
+#### On Pull Request:
+  
+ * Creates full infrastructure in separate **pr-#** workspace
+ * Assigns **pr-#.domain.name** record if **domain_name** provided
+ * Deletes **pr-#** workspace and whole test infrastructure after **merge**
+
+#### On Release:
+
+ * Creates full infrastructure in **prod** workspace
+ * Assigns **prod.domain.name** record if **domain_name** provided
+ * Lambda uses published versions + prod alias only after **healthcheck** passed
+ * Zero downtime deploys via alias switching
+
+
+#### Additional production "manual" run workflows:
+ * `destroy-prod` to complete destroy of **prod** environment
+ * `rollback` by re-pointing alias to previous or input version
+
+### Optional Enhancements/Features (ideas)
 
 | Feature                                          | Pros                                     |
 |--------------------------------------------------|------------------------------------------|
