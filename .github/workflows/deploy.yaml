@@ -20,23 +20,9 @@ jobs:
     with:
       workspace: pr-${{ github.event.pull_request.number }}
       backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate
-      dns_prefix: ${{ github.event.pull_request.number }}
+      dns_prefix: pr-${{ github.event.pull_request.number }}
       action: apply
-    secrets: inherit
-
-  # Destroy PR Test Environment after merge
-  destroy-test:
-    permissions:
-      id-token: write
-      contents: read
-    if: github.event.pull_request.merged == true || github.event.pull_request.state == 'closed'
-    needs: test
-    uses: ./.github/workflows/common.yaml
-    with:
-      workspace: pr-${{ github.event.pull_request.number }}
-      backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate
-      dns_prefix: ${{ github.event.pull_request.number }}
-      action: destroy
+      promote: true
     secrets: inherit
 
   # Deploy Production on Tag/Release
@@ -51,18 +37,70 @@ jobs:
       backend_key: lambda/prod.tfstate
       dns_prefix: prod
       action: apply
+      promote: false  # Do not switch alias until healthcheck passed
     secrets: inherit
 
-  # Destroy Production (manual only)
-  destroy-production:
+  # Lambda Health Check
+  healthcheck:
+    needs: production
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-    if: github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner
+    if: github.event_name == 'pull_request'
+    environment: deploy
+
+    steps:
+      - name: Configure AWS OIDC
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-oidc-terraform-deploy
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Determine Latest Lambda Version
+        id: latest_version
+        run: |
+          FUNC_NAME="birthday_service-pr-${{ github.event.pull_request.number }}"
+          VERSIONS=$(aws lambda list-versions-by-function --function-name $FUNC_NAME --query 'Versions[?Version!=`$LATEST`].[Version]' --output text | sort -n)
+          VERSION=$(echo "$VERSIONS" | tail -n1)
+          echo "Latest version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Run Health Check
+        run: |
+          FUNC_NAME="birthday_service-pr-${{ github.event.pull_request.number }}"
+          VERSION=${{ steps.latest_version.outputs.version }}
+          echo "Running health check on version $VERSION..."
+
+          STATUS=$(aws lambda invoke \
+            --function-name $FUNC_NAME \
+            --qualifier $VERSION \
+            --payload '{"httpMethod":"GET","rawPath":"/hello/TestDeployHealthCheck"}' \
+            --cli-binary-format raw-in-base64-out \
+            out.json \
+            --query 'StatusCode' \
+            --output text)
+
+          echo "Response:"
+          cat out.json
+          echo "StatusCode: $STATUS"
+
+          if [ "$STATUS" == "" ]; then
+            echo "Health check failed. Aborting alias promotion."
+            exit 1
+          fi
+
+  promote:
+    needs: healthcheck
+    permissions:
+      id-token: write
+      contents: read
+    if: github.event_name == 'pull_request'
     uses: ./.github/workflows/common.yaml
     with:
       workspace: prod
       backend_key: lambda/prod.tfstate
       dns_prefix: prod
-      action: destroy
+      action: apply
+      promote: true
     secrets: inherit

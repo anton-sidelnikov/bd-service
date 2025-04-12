@@ -9,6 +9,7 @@ on:
         default: ""
 
 jobs:
+  # Rollback Prod Lambda to Previous Version
   rollback:
     name: Rollback Lambda to Previous Version
     runs-on: ubuntu-latest
@@ -41,7 +42,7 @@ jobs:
       - name: Determine latest versions
         id: lambda_versions
         run: |
-          FUNC_NAME="birthday-service-prod"
+          FUNC_NAME="birthday_service-prod"
           echo "Fetching latest Lambda versions..."
           VERSIONS=$(aws lambda list-versions-by-function --function-name $FUNC_NAME --query 'Versions[?Version!=`$LATEST`].[Version]' --output text | sort -n)
           echo "All Versions: $VERSIONS"

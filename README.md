@@ -4,7 +4,11 @@
 
 ## Problem Statement
 
-Create a highly available, cost-effective, and serverless birthday notification service.
+Create a highly available, cost-effective, birthday notification service.
+
+## Solutions comparison
+
+See [Comparison document](COMPARISON.md).
 
 ### Functional Requirements
 
@@ -75,7 +79,6 @@ utils.py               # utility functions
 requirements.txt
 ```
 
-
 ### Setup Instructions
 
 #### Step 1: GitHub OIDC Provider (Only Manual)
@@ -130,6 +133,12 @@ App & DB Segregation
  * Terraform deploy role has least-privilege access
  * No long-term AWS credentials required
 
+### GitHub Hardening (CI/CD)
+
+  * Actions: Require approval for all external contributors
+  * Branch protection rules: Require a pull request before merging
+  * Branch protection rules: Require approvals - 1
+
 ### DynamoDB Backup Strategy
 
 DynamoDB does not include backups by default.
@@ -142,7 +151,7 @@ DynamoDB does not include backups by default.
  * Integrated with OIDC-authenticated deploy role
 
 ### Deployment Strategy
- * Lambda uses published versions + prod alias
+ * Lambda uses published versions + prod alias only after healthcheck passed
  * Zero downtime deploys via alias switching
  * Rollback by re-pointing alias to previous version
 
@@ -153,4 +162,3 @@ DynamoDB does not include backups by default.
 | **CloudWatch Alarms**                            | Alert on Lambda/API errors               |
 | **WAF + API Gateway for IP-based rate limiting** | Prevent abuse                            |
 | **DynamoDB Backup Strategy**                     | Data availability and durability         |
-| **Terraform Workspaces**                         | Support multiple environments (dev/prod) |

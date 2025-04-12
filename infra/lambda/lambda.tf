@@ -21,8 +21,8 @@ resource "aws_lambda_function" "birthday" {
   }
 }
 
-# Alias for prod
 resource "aws_lambda_alias" "alias" {
+  count            = var.promote ? 1 : 0
   name             = terraform.workspace == "prod" ? "prod" : terraform.workspace
   function_name    = aws_lambda_function.birthday.function_name
   function_version = var.rollback_version != "" ? var.rollback_version : aws_lambda_function.birthday.version

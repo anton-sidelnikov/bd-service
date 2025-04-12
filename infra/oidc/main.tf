@@ -54,7 +54,8 @@ resource "aws_iam_policy" "deploy_policy" {
           "apigateway:POST",
           "apigateway:DELETE",
           "apigateway:PUT",
-          "apigateway:PATCH"
+          "apigateway:PATCH",
+          "apigateway:TagResource"
         ],
         "Resource": "arn:aws:apigateway:*"
       },
@@ -97,6 +98,18 @@ resource "aws_iam_policy" "deploy_policy" {
           "iam:CreateServiceLinkedRole"
         ],
         Resource = "*"
+      },
+
+      {
+        Effect = "Allow",
+        Action = [
+          "iam:CreatePolicy",
+          "iam:DeletePolicy",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:ListPolicyVersions"
+        ],
+        Resource = "arn:aws:iam::${var.aws_account_id}:policy/dynamo_rw_policy*"
       },
 
       # CloudWatch Logs (for Lambda)

@@ -1,0 +1,24 @@
+name: Destroy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type 'DESTROY' to confirm"
+        required: true
+
+jobs:
+  # Destroy Prod Environment
+  destroy-prod:
+    if: github.event.inputs.confirm == 'DESTROY' && github.actor == github.repository_owner
+    name: Destroy Production Infra
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/common.yaml
+    with:
+      workspace: prod
+      backend_key: lambda/prod.tfstate
+      dns_prefix: prod
+      action: destroy
+    secrets: inherit
