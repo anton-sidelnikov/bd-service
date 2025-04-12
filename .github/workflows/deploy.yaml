@@ -22,7 +22,7 @@ jobs:
       backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate
       dns_prefix: pr-${{ github.event.pull_request.number }}
       action: apply
-      promote: false  # ⛔ Do not switch alias
+      promote: true
     secrets: inherit
 
   # Deploy Production on Tag/Release
@@ -37,11 +37,12 @@ jobs:
       backend_key: lambda/prod.tfstate
       dns_prefix: prod
       action: apply
+      promote: false  # Do not switch alias until healthcheck passed
     secrets: inherit
 
   # Lambda Health Check
   healthcheck:
-    needs: test
+    needs: production
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -85,7 +86,7 @@ jobs:
           echo "StatusCode: $STATUS"
 
           if [ "$STATUS" == "" ]; then
-            echo "❌ Health check failed. Aborting alias promotion."
+            echo "Health check failed. Aborting alias promotion."
             exit 1
           fi
 
@@ -97,10 +98,9 @@ jobs:
     if: github.event_name == 'pull_request'
     uses: ./.github/workflows/common.yaml
     with:
-      workspace: pr-${{ github.event.pull_request.number }}
-      backend_key: lambda/pr-${{ github.event.pull_request.number }}.tfstate
-      dns_prefix: pr-${{ github.event.pull_request.number }}
+      workspace: prod
+      backend_key: lambda/prod.tfstate
+      dns_prefix: prod
       action: apply
       promote: true
     secrets: inherit
-
