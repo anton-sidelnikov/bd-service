@@ -60,7 +60,7 @@ jobs:
       - name: Determine Latest Lambda Version
         id: latest_version
         run: |
-          FUNC_NAME="birthday_service-pr-${{ github.event.pull_request.number }}"
+          FUNC_NAME="birthday_service-prod"
           VERSIONS=$(aws lambda list-versions-by-function --function-name $FUNC_NAME --query 'Versions[?Version!=`$LATEST`].[Version]' --output text | sort -n)
           VERSION=$(echo "$VERSIONS" | tail -n1)
           echo "Latest version: $VERSION"
@@ -68,7 +68,7 @@ jobs:
 
       - name: Run Health Check
         run: |
-          FUNC_NAME="birthday_service-pr-${{ github.event.pull_request.number }}"
+          FUNC_NAME="birthday_service-prod"
           VERSION=${{ steps.latest_version.outputs.version }}
           echo "Running health check on version $VERSION..."
 
